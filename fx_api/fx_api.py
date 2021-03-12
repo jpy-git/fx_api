@@ -2,7 +2,7 @@ import requests
 import json
 import pandas as pd
 from datetime import datetime as dt
-from helpers import is_string_or_list_of_strings
+from fx_api.helpers import is_string_or_list_of_strings
 
 class FX:
     """FX class allows user to specify source and target currencies when initialising an instance. Various methods can the be applied to obtain desired exchange rates.
