@@ -99,6 +99,9 @@ class FX:
                 params=params
             )
 
+            # Check for and raise HTTP exceptions
+            response.raise_for_status()
+
             # Normalize results of JSON response and add to a temporary (source_currency specific) pandas DataFrame
             source_currency_list = []
             date_list = []
@@ -179,6 +182,9 @@ class FX:
                 url=url,
                 params=params
             )
+
+            # Check for and raise HTTP exceptions
+            response.raise_for_status()
 
             # Normalize results of JSON response and add to a temporary (source_currency specific) pandas DataFrame
             source_currency_list = []
@@ -273,6 +279,9 @@ class FX:
                 params=params
             )
 
+            # Check for and raise HTTP exceptions
+            response.raise_for_status()
+            
             # Normalize results of JSON response and add to a temporary (source_currency specific) pandas DataFrame
             source_currency_list = []
             date_list = []
@@ -303,12 +312,3 @@ class FX:
             )
 
         return FX_df
-
-if __name__=='__main__':   
-    print(FX().get_FX_latest())
-    print(FX(source_currency="USD").get_FX_latest())
-    print(FX(target_currency="CAD").get_FX_latest())
-    print(FX(target_currency=["CAD","USD"]).get_FX_latest())
-    print(FX(source_currency=["USD","GBP"],target_currency=["CAD","EUR"]).get_FX_latest())
-    print(FX(source_currency=["USD","GBP"]).get_FX_date_range(start_at="2020-12-29",end_at="2021-01-05"))
-    print(FX(source_currency=["USD","GBP"]).get_FX_date(date="2020-12-29"))
