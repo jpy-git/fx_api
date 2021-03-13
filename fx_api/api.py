@@ -103,32 +103,29 @@ class FX:
             response.raise_for_status()
 
             # Normalize results of JSON response and add to a temporary (source_currency specific) pandas DataFrame
-            source_currency_list = []
-            date_list = []
-            target_currency_list = []
-            exchange_rate_to_target_list = []
-
-            for target_currency in response.json()['rates']:
-
-                date_list.append(response.json()['date'])
-                source_currency_list.append(response.json()['base'])
-                target_currency_list.append(target_currency)
-                exchange_rate_to_target_list.append(response.json()['rates'][target_currency])
-
-            temp_FX_df = pd.DataFrame(
-                data={
-                    "date": date_list,
-                    "source_currency": source_currency_list,
-                    "target_currency": target_currency_list,
-                    "exchange_rate_to_target": exchange_rate_to_target_list
-                }
+            temp_FX_df = pd.json_normalize(response.json()).rename(columns={"base": "source_currency"})
+            
+            temp_FX_df = temp_FX_df.melt(
+                id_vars=["date", "source_currency"], 
+                value_vars=[col for col in temp_FX_df.columns if col.startswith("rates.")], 
+                var_name="target_currency", 
+                value_name='exchange_rate_to_target'
             )
+
+            temp_FX_df[["target_currency"]] = temp_FX_df["target_currency"].str.split(".", expand=True).loc[:,[1]]
+            temp_FX_df = temp_FX_df.loc[:, ["date", "source_currency", "target_currency", "exchange_rate_to_target"]]
 
             # Append temporary (source_currency specific) pandas DataFrame to master pandas DataFrame to return complete result
             FX_df = FX_df.append(
                 temp_FX_df, 
                 ignore_index=True
             )
+
+        FX_df.sort_values(
+            by=["date", "source_currency", "target_currency"],
+            ascending=True,
+            inplace=True
+        )
 
         return FX_df
 
@@ -187,32 +184,29 @@ class FX:
             response.raise_for_status()
 
             # Normalize results of JSON response and add to a temporary (source_currency specific) pandas DataFrame
-            source_currency_list = []
-            date_list = []
-            target_currency_list = []
-            exchange_rate_to_target_list = []
-
-            for target_currency in response.json()['rates']:
-
-                date_list.append(date)
-                source_currency_list.append(response.json()['base'])
-                target_currency_list.append(target_currency)
-                exchange_rate_to_target_list.append(response.json()['rates'][target_currency])
-
-            temp_FX_df = pd.DataFrame(
-                data={
-                    "date": date_list,
-                    "source_currency": source_currency_list,
-                    "target_currency": target_currency_list,
-                    "exchange_rate_to_target": exchange_rate_to_target_list
-                }
+            temp_FX_df = pd.json_normalize(response.json()).rename(columns={"base": "source_currency"})
+            
+            temp_FX_df = temp_FX_df.melt(
+                id_vars=["date", "source_currency"], 
+                value_vars=[col for col in temp_FX_df.columns if col.startswith("rates.")], 
+                var_name="target_currency", 
+                value_name='exchange_rate_to_target'
             )
+
+            temp_FX_df[["target_currency"]] = temp_FX_df["target_currency"].str.split(".", expand=True).loc[:,[1]]
+            temp_FX_df = temp_FX_df.loc[:, ["date", "source_currency", "target_currency", "exchange_rate_to_target"]]
 
             # Append temporary (source_currency specific) pandas DataFrame to master pandas DataFrame to return complete result
             FX_df = FX_df.append(
                 temp_FX_df, 
                 ignore_index=True
             )
+
+        FX_df.sort_values(
+            by=["date", "source_currency", "target_currency"],
+            ascending=True,
+            inplace=True
+        )
 
         return FX_df
 
@@ -283,32 +277,28 @@ class FX:
             response.raise_for_status()
             
             # Normalize results of JSON response and add to a temporary (source_currency specific) pandas DataFrame
-            source_currency_list = []
-            date_list = []
-            target_currency_list = []
-            exchange_rate_to_target_list = []
-
-            for date in response.json()['rates']:
-                for target_currency in response.json()['rates'][date]:
-
-                    date_list.append(date)
-                    source_currency_list.append(response.json()['base'])
-                    target_currency_list.append(target_currency)
-                    exchange_rate_to_target_list.append(response.json()['rates'][date][target_currency])
-
-            temp_FX_df = pd.DataFrame(
-                data={
-                    "date": date_list,
-                    "source_currency": source_currency_list,
-                    "target_currency": target_currency_list,
-                    "exchange_rate_to_target": exchange_rate_to_target_list
-                }
+            temp_FX_df = pd.json_normalize(response.json()).rename(columns={"base": "source_currency"})
+            
+            temp_FX_df = temp_FX_df.melt(
+                id_vars=["source_currency"], 
+                value_vars=[col for col in temp_FX_df.columns if col.startswith("rates.")], 
+                var_name="target_currency", 
+                value_name='exchange_rate_to_target'
             )
+
+            temp_FX_df[["date", "target_currency"]] = temp_FX_df["target_currency"].str.split(".", expand=True).loc[:,[1, 2]]
+            temp_FX_df = temp_FX_df.loc[:, ["date", "source_currency", "target_currency", "exchange_rate_to_target"]]
 
             # Append temporary (source_currency specific) pandas DataFrame to master pandas DataFrame to return complete result
             FX_df = FX_df.append(
                 temp_FX_df, 
                 ignore_index=True
             )
+
+        FX_df.sort_values(
+            by=["date", "source_currency", "target_currency"],
+            ascending=True,
+            inplace=True
+        )
 
         return FX_df

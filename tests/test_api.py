@@ -70,7 +70,7 @@ def test_get_FX_date_non_empty():
 def test_get_FX_date_date():
     """Test returned date is same as input date
     """
-    assert FX().get_FX_date(date="2020-03-14")['date'][0] == "2020-03-14"
+    assert FX().get_FX_date(date="2020-03-13")['date'][0] == "2020-03-13"
 
 def test_get_FX_date_type():
     """Test dtypes of returned DataFrame
