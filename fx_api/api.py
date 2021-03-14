@@ -2,15 +2,23 @@ import requests
 import json
 import pandas as pd
 from datetime import datetime as dt
+from ratelimit import limits, RateLimitException
+from backoff import on_exception, expo
 from fx_api.helpers import is_string_or_list_of_strings
 
 class FX:
-    """FX class allows user to specify source and target currencies when initialising an instance. Various methods can the be applied to obtain desired exchange rates.
+    """FX class allows user to specify source and target currencies when initialising an instance. Various methods can then be applied to obtain desired exchange rates.
 
     Class Attributes
     -------
     base_url : str
         URL of exchangeratesapi.io
+    limits_calls : int, optional
+        number of calls permitted in limits_period before rate-limiting begins, by default 20
+    limits_period : int, optional
+        number of seconds before limits_calls count is reset, by default 20
+    limits_max_tries : int, optional
+        number of tries before exponential backoff ends and returns RateLimitException, by default 10
 
     Instance Attributes
     -------
@@ -31,6 +39,11 @@ class FX:
 
     # URL of exchangeratesapi.io
     base_url = "https://api.exchangeratesapi.io"
+
+    # rate limiting params
+    limits_calls = 20
+    limits_period = 20
+    limits_max_tries = 10
 
     def __init__(self, source_currency="GBP", target_currency=None):
         """Initialise instance of FX class.
@@ -62,6 +75,8 @@ class FX:
         else:
             self.target_currency = target_currency
 
+    @on_exception(expo, RateLimitException, max_tries=limits_max_tries)
+    @limits(calls=limits_calls, period=limits_period)
     def get_FX_latest(self):
         """Retrieve pandas DataFrame of latest available exchange rates.
 
@@ -126,9 +141,16 @@ class FX:
             ascending=True,
             inplace=True
         )
+        
+        FX_df.reset_index(
+            drop=True, 
+            inplace=True
+        )
 
         return FX_df
 
+    @on_exception(expo, RateLimitException, max_tries=limits_max_tries)
+    @limits(calls=limits_calls, period=limits_period)
     def get_FX_date(self, date):
         """Retrieve pandas DataFrame of exchange rates for a specified date
 
@@ -207,11 +229,18 @@ class FX:
             ascending=True,
             inplace=True
         )
+        
+        FX_df.reset_index(
+            drop=True, 
+            inplace=True
+        )
 
         return FX_df
 
+    @on_exception(expo, RateLimitException, max_tries=limits_max_tries)
+    @limits(calls=limits_calls, period=limits_period)
     def get_FX_date_range(self, start_at, end_at):
-        """retrieve pandas DataFrame of exchange rates for within specified date range
+        """Retrieve pandas DataFrame of exchange rates for within specified date range
 
         Parameters
         ----------
@@ -298,6 +327,11 @@ class FX:
         FX_df.sort_values(
             by=["date", "source_currency", "target_currency"],
             ascending=True,
+            inplace=True
+        )
+        
+        FX_df.reset_index(
+            drop=True, 
             inplace=True
         )
 
