@@ -20,6 +20,13 @@ SHELL:
 venv/bin/activate
 ```
 
+Upgrade pip
+
+SHELL:
+```
+python -m pip install --upgrade pip
+```
+
 Install dependencies. Again I have set specific package versions to ensure a consistent environment. 
 
 SHELL:
@@ -33,6 +40,8 @@ SHELL:
 ```
 python setup.py develop
 ```
+
+Restart shell before proceeding.
 
 ## Unit tests
 
