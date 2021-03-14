@@ -1,6 +1,6 @@
 import pytest
 from fx_api import FX
-from datetime import date, timedelta
+from datetime import date, timedelta, datetime
 import requests
 
 def test_base_url():
@@ -45,11 +45,12 @@ def test_get_FX_latest_non_empty():
     assert FX().get_FX_latest().shape[0] > 0
 
 def test_get_FX_latest_date():
-    """Test returned date is either today or yesterday (could be that today not yet updated)
+    """Test returned date is in last week (could be that today not yet updated or is not a working day)
     """
-    today = date.today()
-    yesterday = today - timedelta(days=1)
-    assert FX().get_FX_latest()['date'][0] in [today.strftime('%Y-%m-%d'), yesterday.strftime('%Y-%m-%d')]
+    today = datetime.today()
+    last_week = today - timedelta(days=7)
+    assert datetime.strptime(FX().get_FX_latest()['date'][0], '%Y-%m-%d') > last_week 
+    assert datetime.strptime(FX().get_FX_latest()['date'][0], '%Y-%m-%d') <= today
 
 def test_get_FX_latest_type():
     """Test dtypes of returned DataFrame
