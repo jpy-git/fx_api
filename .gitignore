@@ -132,5 +132,5 @@ dmypy.json
 .pyre/
 
 # Data files
-*.csv
-*.sqlite3
+scripts/*.csv
+scripts/*.sqlite3
